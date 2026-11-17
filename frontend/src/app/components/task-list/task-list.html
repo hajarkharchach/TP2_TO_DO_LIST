@@ -1,0 +1,46 @@
+<mat-card class="container">
+  <mat-card-title> Ma To-Do List</mat-card-title>
+
+  <form [formGroup]="taskForm" (ngSubmit)="addTask()" class="add-form">
+    <mat-form-field appearance="outline" class="grow">
+      <mat-label>Nouvelle tâche</mat-label>
+      <input matInput formControlName="title" placeholder="Ex : Réviser Angular" />
+      <mat-error *ngIf="taskForm.get('title')?.touched && taskForm.get('title')?.invalid">
+        Titre requis (min. 2 caractères).
+      </mat-error>
+    </mat-form-field>
+    <button mat-raised-button color="primary" type="submit" [disabled]="taskForm.invalid">
+      <mat-icon>add</mat-icon> Ajouter
+    </button>
+  </form>
+
+  <p *ngIf="loading">Chargement...</p>
+  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+  <mat-list *ngIf="!loading && tasks.length > 0">
+    <mat-list-item *ngFor="let task of tasks" class="task-item">
+      <mat-checkbox [checked]="task.completed" (change)="toggleCompleted(task)"></mat-checkbox>
+
+      <span *ngIf="editingId !== task._id" class="title" [class.completed]="task.completed">
+        {{ task.title }}
+      </span>
+
+      <input *ngIf="editingId === task._id" class="edit-input"
+             [(ngModel)]="editingTitle" (keyup.enter)="saveEdit(task)" (keyup.escape)="cancelEdit()" />
+
+      <span class="spacer"></span>
+
+      <ng-container *ngIf="editingId === task._id; else viewBtns">
+        <button mat-icon-button color="primary" (click)="saveEdit(task)"><mat-icon>check</mat-icon></button>
+        <button mat-icon-button (click)="cancelEdit()"><mat-icon>close</mat-icon></button>
+      </ng-container>
+
+      <ng-template #viewBtns>
+        <button mat-icon-button color="accent" (click)="startEdit(task)"><mat-icon>edit</mat-icon></button>
+        <button mat-icon-button color="warn" (click)="deleteTask(task)"><mat-icon>delete</mat-icon></button>
+      </ng-template>
+    </mat-list-item>
+  </mat-list>
+
+  <p *ngIf="!loading && tasks.length === 0" class="empty">Aucune tâche. Ajoutez-en une !</p>
+</mat-card>
